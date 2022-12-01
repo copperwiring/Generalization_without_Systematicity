@@ -1,7 +1,7 @@
+from __future__ import unicode_literals, print_function, division
 from dataloader import SCANDatasetLoader, TokenizerSCAN
 from test_tokenizer import TEST_TOKENIZER_ON_ORIGINAL_DATA
-from __future__ import unicode_literals, print_function, division
-import torch
+import torch,os
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
