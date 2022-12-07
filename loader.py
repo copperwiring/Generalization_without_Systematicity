@@ -84,14 +84,14 @@ class TokenizerSCAN():
         if type(words) != list:
             if type(words) == str:
                 words = words.split(" ")
-        return ([self.word_to_n[word] for word in words] + [self.word_to_n["EOS"]])
+        return [self.word_to_n[word] for word in words] + [self.word_to_n["EOS"]]
 
     def encode_outputs(self, cmds):
         """ Describe """
         if type(cmds) != list:
             if type(cmds) == str:
                 cmds = cmds.split(" ")
-        return ([self.command_to_n[cmd] for cmd in cmds] + [self.command_to_n["EOS"]])
+        return [self.command_to_n[cmd] for cmd in cmds] + [self.command_to_n["EOS"]]
 
     def decode_inputs(self, words_n):
         if type(words_n) != list:

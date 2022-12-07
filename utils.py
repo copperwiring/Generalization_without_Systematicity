@@ -1,4 +1,4 @@
-import time
+import time, torch
 import math
 import matplotlib.pyplot as plt
 plt.switch_backend('agg')
@@ -18,10 +18,23 @@ def timeSince(since, percent):
     return '%s (- %s)' % (asMinutes(s), asMinutes(rs))
 
 
-def showPlot(points):
+def showPlot(points, mode):
     plt.figure()
     fig, ax = plt.subplots()
     # this locator puts ticks at regular intervals
     loc = ticker.MultipleLocator(base=0.2)
     ax.yaxis.set_major_locator(loc)
     plt.plot(points)
+    plt.savefig(f"{mode}.png")
+
+def save_model(epochs, model, optimizer, criterion):
+    """
+    Function to save the trained model to disk.
+    """
+    print(f"Saving final model...")
+    torch.save({
+                'epoch': epochs,
+                'model_state_dict': model.state_dict(),
+                'optimizer_state_dict': optimizer.state_dict(),
+                'loss': criterion,
+                }, 'outputs/final_model.pth')

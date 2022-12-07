@@ -187,11 +187,14 @@ tensor_test_data = SCANDataLoader(test_data, tokenizer)
 
 
 # takes 100 samples
-indices = torch.arange(500)
-subset_train = Subset(tensor_train_data, indices)
-subset_test = Subset(tensor_test_data, indices)
+indices = torch.arange(10)
+tensor_subset_train_data = Subset(tensor_train_data, indices)
+tensor_subset_test_data = Subset(tensor_test_data, indices)
 
 
+print("length of sub sample:", len(tensor_subset_train_data))
+
+# import pdb; pdb.set_trace()
 
 MAX_LENGTH = -1
 for inputs, outputs in tokenized_train_data:
@@ -630,12 +633,21 @@ print("max length in the inputs/outputs", MAX_LENGTH)
 
 hidden_size = 100
 dropout_prob = 0.1
-results_dict = []
+results_dict= { "train":[], "test":[]}
+subset=False
+
+
 encoder2 = EncoderGRU(tokenizer.get_n_words(), hidden_size).to(device)
 decoder2 = AttentionDecoderGRU(hidden_size, tokenizer.get_n_cmds(), dropout_prob, dropout_prob, MAX_LENGTH).to(device)
-BahDanauTrainer.train_loop(encoder2, decoder2, tokenizer, subset_train, 5000, print_every=50, plot_every=500, max_length=MAX_LENGTH)
-results_dict['train'].append(BahDanauTrainer(encoder2, decoder2, subset_train))
-results_dict['test'].append(BahDanauTrainer(encoder2, decoder2, subset_test))
+if subset:
+    BahDanauTrainer.train_loop(encoder2, decoder2, tokenizer, tensor_subset_train_data, 50, print_every=10, plot_every=5, max_length=MAX_LENGTH)
+    results_dict['train'].append(BahDanauTrainer.getDatasetAccuracy(encoder2, decoder2, tokenizer, tensor_subset_train_data))
+    results_dict['test'].append(BahDanauTrainer.getDatasetAccuracy(encoder2, decoder2, tokenizer, tensor_subset_test_data))
+    #BahDanauTrainer.evaluateRandomly(encoder2, decoder2, tokenizer, tensor_subset_test_data, mode="test", n=10, plot_attention=True)
+else:
+    BahDanauTrainer.train_loop(encoder2, decoder2, tokenizer, tensor_train_data, 5000, print_every=50, plot_every=500, max_length=MAX_LENGTH)
+    results_dict['train'].append(BahDanauTrainer.getDatasetAccuracy(encoder2, decoder2, tensor_train_data))
+    results_dict['test'].append(BahDanauTrainer.getDatasetAccuracy(encoder2, decoder2, tensor_test_data))
 
 results_pd = pd.DataFrame.from_dict(results_dict)
 results_pd.to_csv("results.csv")

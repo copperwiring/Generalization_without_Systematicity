@@ -75,6 +75,7 @@ class BahDanauTrainer():
 
     def train_loop(encoder, decoder, tokenizer, data, n_iters, print_every=1000, plot_every=100, learning_rate=0.001, max_length=50):
         start = time.time()
+        mode = 'train'
         plot_losses = []
         print_loss_total = 0  # Reset every print_every
         plot_loss_total = 0  # Reset every plot_every
@@ -105,7 +106,10 @@ class BahDanauTrainer():
                 plot_losses.append(plot_loss_avg)
                 plot_loss_total = 0
 
-        showPlot(plot_losses)
+        # save the trained model weights for a final time
+        # save_model(epochs, model, optim, criterion)
+
+        showPlot(plot_losses, mode)
 
     def evaluate(encoder, decoder, tokenizer, token_vector, max_length=50):
         with torch.no_grad():
@@ -173,7 +177,8 @@ class BahDanauTrainer():
 
             return decoded_words, decoder_attentions[:di + 1]
 
-    def getDatasetAccuracyOwn(encoder, decoder, tokenizer, test_data):
+    def getDatasetAccuracy(encoder, decoder, tokenizer, test_data):
+        # import pdb; pdb.set_trace()
         correct_array = np.zeros(len(test_data), dtype=bool)
         for i in range(len(test_data)):
             output_words, attentions = BahDanauTrainer.evaluate(encoder, decoder, tokenizer, test_data[i][0])
@@ -182,19 +187,19 @@ class BahDanauTrainer():
             correct_array[i] = y == y_pred
         return np.array(correct_array).sum() / len(correct_array)
 
-    def evaluateRandomly(encoder, decoder, tokenizer, data, n=10, plot_attention=False):
+    def evaluateRandomly(encoder, decoder, tokenizer, data, mode, n=10, plot_attention=False):
         for i in range(n):
             i_pair = random.choice(np.arange(len(data)))
             vector_detached = data[i_pair]
             inputs = tokenizer.decode_inputs(vector_detached[0].flatten().detach().to("cpu").numpy())
             outputs_expect = tokenizer.decode_outputs(vector_detached[1].flatten().detach().to("cpu").numpy())
-            print('>', " ".join(inputs))
-            print('=', " ".join(outputs_expect))
+            # print('>', " ".join(inputs))
+            # print('=', " ".join(outputs_expect))
             output_words, attentions = BahDanauTrainer.evaluate(encoder, decoder, tokenizer, data[i_pair][0])
             output_sentence = ' '.join(output_words)
             output_expected_sent = " ".join(outputs_expect)
             # print("Attention: ", torch.round(attentions[:len(output_words),:len(data[i_pair][0])],decimals=5))
-            print('<', output_sentence)
+            # print('<', output_sentence)
             if plot_attention:
                 att_relevant_data = attentions[:len(output_words), :len(data[i_pair][0])]
                 fig, ax = plt.subplots()
@@ -207,4 +212,5 @@ class BahDanauTrainer():
                 ax.set_xticks(np.arange(len(output_words)), labels=output_words)
                 plt.xticks(rotation=90)
                 plt.show()
-            print('Correct: ', output_sentence == output_expected_sent)
+                plt.savefig(f"attn_{mode}.png")
+            # print('Correct: ', output_sentence == output_expected_sent)
