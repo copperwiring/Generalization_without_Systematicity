@@ -1,9 +1,16 @@
 import time
 import torch
 import random
+from utils import MAX_LENGTH
 from tf_ratio import teacher_forcing_ratio
-from utils import showPlot
+from utils import showPlot, device, timeSince
+from torch import optim, nn
+from reduced_training import get_reduced_training_set
+from utils import get_torched_vec_data, tokenize_data, train_data, test_data, tokenizer
 
+# Get tokenized version of the data
+tokenized_train_data = tokenize_data(train_data) # Remove from here
+tokenized_test_data = tokenize_data(test_data)
 
 def train(input_tensor, target_tensor, encoder, decoder, encoder_optimizer, decoder_optimizer, criterion,
           max_length=MAX_LENGTH):
@@ -60,6 +67,12 @@ def train(input_tensor, target_tensor, encoder, decoder, encoder_optimizer, deco
     decoder_optimizer.step()
 
     return loss.item() / target_length
+
+
+torch_train = get_torched_vec_data()
+pairs = get_reduced_training_set(torch_train, 0.01)
+
+
 def trainIters(encoder, decoder, n_iters, print_every=1000, plot_every=100, learning_rate=0.001):
     start = time.time()
     plot_losses = []

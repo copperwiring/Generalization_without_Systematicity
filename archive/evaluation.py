@@ -1,7 +1,7 @@
 import numpy as np
 import random
 import torch
-
+from utils import MAX_LENGTH
 
 def evaluate(encoder, decoder, token_vector, max_length=MAX_LENGTH):
     with torch.no_grad():
@@ -51,11 +51,4 @@ def evaluateRandomly(encoder, decoder, data, n=5):
         print('')
 
 
-def getDatasetAccuracy(encoder, decoder, test_data):
-    correct_array = np.zeros(len(test_data), dtype=bool)
-    for i in range(len(test_data)):
-        output_words, attentions = evaluate(encoder, decoder, test_data[i][0])
-        y = tokenizer.decode_outputs(test_data[i][1].flatten().detach().to("cpu").numpy())
-        y_pred = output_words
-        correct_array[i] = y == y_pred
-    return np.array(correct_array).sum() / len(correct_array)
+
