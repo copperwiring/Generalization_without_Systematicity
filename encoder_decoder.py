@@ -135,7 +135,7 @@ class AttentionDecoderGRU(nn.Module):
         # The paper then states that this hidden state is concatenated to the
         # context vector and this is used to predict the next output action (a_i)
         # The tutorial used a log_softmax (likely to avoid overflow)
-        output = torch.cat((new_hidden[-1], context_vec.view(1, -1)), dim=1)
+        output = torch.cat((output[-1], context_vec.view(1, -1)), dim=1)
         output = self.out(output)
         output = F.log_softmax(output, dim=1)
         return output, new_hidden, att_vec
@@ -183,7 +183,7 @@ class AttentionDecoderGRUv2(nn.Module):
         # The paper then states that this hidden state is concatenated to the
         # context vector and this is used to predict the next output action (a_i)
         # The tutorial used a log_softmax (likely to avoid overflow)
-        output = torch.cat((new_hidden[-1], context_vec.view(1, -1)), 1)
+        output = torch.cat((output[-1], context_vec.view(1, -1)), 1)
         output = self.out(output)
         output = F.log_softmax(output, dim=1)
         return output, new_hidden, att_vec

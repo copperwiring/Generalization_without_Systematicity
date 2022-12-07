@@ -13,7 +13,7 @@ import pandas as pd
 from pathlib import Path
 
 # Loading the data and training the encoder
-DATA_CLOUD = "SCAN/"
+DATA_CLOUD = "SCAN//SCAN-master/"
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 def tokenize_data(data):
