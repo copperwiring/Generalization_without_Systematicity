@@ -18,14 +18,14 @@ def timeSince(since, percent):
     return '%s (- %s)' % (asMinutes(s), asMinutes(rs))
 
 
-def showPlot(points, mode):
+def showPlot(points, filename):
     plt.figure()
     fig, ax = plt.subplots()
     # this locator puts ticks at regular intervals
     loc = ticker.MultipleLocator(base=0.2)
     ax.yaxis.set_major_locator(loc)
     plt.plot(points)
-    plt.savefig(f"{mode}.png")
+    plt.savefig(f"{filename}.png")
 
 def save_model(epochs, model, optimizer, criterion):
     """

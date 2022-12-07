@@ -1,10 +1,12 @@
+import os.path
+
 import torch, time, random
 from torch import optim
 from utils import *
 import numpy as np
 import matplotlib as mpl
 import torch.nn as nn
-
+from pathlib import Path
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -73,9 +75,12 @@ class BahDanauTrainer():
 
         return loss.item() / target_length
 
-    def train_loop(encoder, decoder, tokenizer, data, n_iters, print_every=1000, plot_every=100, learning_rate=0.001, max_length=50):
+    def train_loop(encoder, decoder, tokenizer, data, n_iters, seed_value=1, print_every=1000, plot_every=100, learning_rate=0.001, max_length=50):
         start = time.time()
         mode = 'train'
+        # creating a new directory where the loss plots will be saved
+        plot_dir = "plot_loss"
+        Path(plot_dir).mkdir(parents=True, exist_ok=True)
         plot_losses = []
         print_loss_total = 0  # Reset every print_every
         plot_loss_total = 0  # Reset every plot_every
@@ -109,7 +114,7 @@ class BahDanauTrainer():
         # save the trained model weights for a final time
         # save_model(epochs, model, optim, criterion)
 
-        showPlot(plot_losses, mode)
+        showPlot(plot_losses, os.path.join(plot_dir,str(seed_value) + "_" + mode))
 
     def evaluate(encoder, decoder, tokenizer, token_vector, max_length=50):
         with torch.no_grad():

@@ -1,12 +1,16 @@
 
 from __future__ import unicode_literals, print_function, division
-import torch
+
+import os.path
+
+import torch, random
 from torch.utils.data import Dataset
 from loader import SCANDataset, TokenizerSCAN, SCANDataLoader
 from encoder_decoder import EncoderGRU, AttentionDecoderGRU
 from bahdanau_trainer import BahDanauTrainer
 from torch.utils.data import Subset
 import pandas as pd
+from pathlib import Path
 
 # Loading the data and training the encoder
 DATA_CLOUD = "SCAN/SCAN-master/"
@@ -633,21 +637,27 @@ print("max length in the inputs/outputs", MAX_LENGTH)
 
 hidden_size = 100
 dropout_prob = 0.1
-results_dict= { "train":[], "test":[]}
-subset=False
+subset=True
 
+for i in range(5):
+    results_dict = {"train": [], "test": []}
+    print(f"Seed: {i + 1}")
+    seed_val = i+1
+    random.seed(i)
+    encoder2 = EncoderGRU(tokenizer.get_n_words(), hidden_size).to(device)
+    decoder2 = AttentionDecoderGRU(hidden_size, tokenizer.get_n_cmds(), dropout_prob, dropout_prob, MAX_LENGTH).to(device)
+    if subset:
+        BahDanauTrainer.train_loop(encoder2, decoder2, tokenizer, tensor_subset_train_data, 50, seed_val, print_every=10, plot_every=5, max_length=MAX_LENGTH)
+        results_dict['train'].append(BahDanauTrainer.getDatasetAccuracy(encoder2, decoder2, tokenizer, tensor_subset_train_data))
+        results_dict['test'].append(BahDanauTrainer.getDatasetAccuracy(encoder2, decoder2, tokenizer, tensor_subset_test_data))
+        #BahDanauTrainer.evaluateRandomly(encoder2, decoder2, tokenizer, tensor_subset_test_data, mode="test", n=10, plot_attention=True)
+    else:
+        BahDanauTrainer.train_loop(encoder2, decoder2, tokenizer, tensor_train_data, 5000, print_every=50, plot_every=500, max_length=MAX_LENGTH)
+        results_dict['train'].append(BahDanauTrainer.getDatasetAccuracy(encoder2, decoder2, tensor_train_data))
+        results_dict['test'].append(BahDanauTrainer.getDatasetAccuracy(encoder2, decoder2, tensor_test_data))
 
-encoder2 = EncoderGRU(tokenizer.get_n_words(), hidden_size).to(device)
-decoder2 = AttentionDecoderGRU(hidden_size, tokenizer.get_n_cmds(), dropout_prob, dropout_prob, MAX_LENGTH).to(device)
-if subset:
-    BahDanauTrainer.train_loop(encoder2, decoder2, tokenizer, tensor_subset_train_data, 50, print_every=10, plot_every=5, max_length=MAX_LENGTH)
-    results_dict['train'].append(BahDanauTrainer.getDatasetAccuracy(encoder2, decoder2, tokenizer, tensor_subset_train_data))
-    results_dict['test'].append(BahDanauTrainer.getDatasetAccuracy(encoder2, decoder2, tokenizer, tensor_subset_test_data))
-    #BahDanauTrainer.evaluateRandomly(encoder2, decoder2, tokenizer, tensor_subset_test_data, mode="test", n=10, plot_attention=True)
-else:
-    BahDanauTrainer.train_loop(encoder2, decoder2, tokenizer, tensor_train_data, 5000, print_every=50, plot_every=500, max_length=MAX_LENGTH)
-    results_dict['train'].append(BahDanauTrainer.getDatasetAccuracy(encoder2, decoder2, tensor_train_data))
-    results_dict['test'].append(BahDanauTrainer.getDatasetAccuracy(encoder2, decoder2, tensor_test_data))
-
-results_pd = pd.DataFrame.from_dict(results_dict)
-results_pd.to_csv("results.csv")
+    results_pd = pd.DataFrame.from_dict(results_dict) # fix because they aint in diff columns
+    # creating a directory where the results will be saved
+    results_dir = "results"
+    Path(results_dir).mkdir(parents=True, exist_ok=True)
+    results_pd.to_csv(os.path.join(results_dir, str(seed_val) + "_" + "results.csv"))
