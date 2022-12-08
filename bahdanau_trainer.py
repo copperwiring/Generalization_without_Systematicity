@@ -1,5 +1,6 @@
 import os.path
 
+import matplotlib.pyplot as plt
 import torch, time, random
 from torch import optim
 from utils import *
@@ -217,5 +218,8 @@ class BahDanauTrainer():
                 ax.set_xticks(np.arange(len(output_words)), labels=output_words)
                 plt.xticks(rotation=90)
                 plt.show()
-                plt.savefig(f"attn_{mode}.png")
+                # creating a directory where the results will be saved
+                attn_dir = "attn_visuals"
+                Path(attn_dir).mkdir(parents=True, exist_ok=True)
+                plt.savefig((os.path.join(attn_dir, str(i) + "_attn_" + mode + ".png")))
             # print('Correct: ', output_sentence == output_expected_sent)
