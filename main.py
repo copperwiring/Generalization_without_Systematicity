@@ -13,7 +13,7 @@ import pandas as pd
 from pathlib import Path
 
 # Loading the data and training the encoder
-DATA_CLOUD = "SCAN/SCAN-master/"
+DATA_CLOUD = "SCAN/"
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 def tokenize_data(data):
@@ -93,7 +93,7 @@ print("max length in the inputs/outputs", MAX_LENGTH)
 
 hidden_size = 100
 dropout_prob = 0.1
-subset=True
+subset=False
 
 for i in range(5):
     results_dict = {"train": [], "test": []}
