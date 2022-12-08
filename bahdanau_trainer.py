@@ -76,7 +76,7 @@ class BahDanauTrainer():
 
         return loss.item() / target_length
 
-    def train_loop(encoder, decoder, tokenizer, data, n_iters, seed_value=1, print_every=1000, plot_every=100, learning_rate=0.001, max_length=50):
+    def train_loop(encoder, decoder, tokenizer, data, n_iters, exp_result_dir, seed_value=1, print_every=1000, plot_every=100, learning_rate=0.001, max_length=50):
         start = time.time()
         mode = 'train'
         # creating a new directory where the loss plots will be saved
@@ -115,7 +115,9 @@ class BahDanauTrainer():
         # save the trained model weights for a final time
         # save_model(epochs, model, optim, criterion)
 
-        showPlot(plot_losses, os.path.join(plot_dir,str(seed_value) + "_" + mode))
+        loss_dir = "plot_loss"
+        Path(loss_dir).mkdir(parents=True, exist_ok=True)
+        showPlot(plot_losses, os.path.join(loss_dir, exp_result_dir + "_seed" + str(seed_value) + "_" + mode))
 
     def evaluate(encoder, decoder, tokenizer, token_vector, max_length=50):
         with torch.no_grad():
@@ -193,7 +195,7 @@ class BahDanauTrainer():
             correct_array[i] = y == y_pred
         return np.array(correct_array).sum() / len(correct_array)
 
-    def evaluateRandomly(encoder, decoder, tokenizer, data, mode, n=10, plot_attention=False):
+    def evaluateRandomly(encoder, decoder, tokenizer, data, exp_result_dir, mode, n=10, plot_attention=False):
         for i in range(n):
             i_pair = random.choice(np.arange(len(data)))
             vector_detached = data[i_pair]
@@ -221,5 +223,7 @@ class BahDanauTrainer():
                 # creating a directory where the results will be saved
                 attn_dir = "attn_visuals"
                 Path(attn_dir).mkdir(parents=True, exist_ok=True)
-                plt.savefig((os.path.join(attn_dir, str(i) + "_attn_" + mode + ".png")))
+                # Path(exp_result_dir).mkdir(parents=True, exist_ok=True)
+
+                plt.savefig((os.path.join(attn_dir, exp_result_dir + "_seed"+ str(i) + "_attn_" + mode + ".png")))
             # print('Correct: ', output_sentence == output_expected_sent)

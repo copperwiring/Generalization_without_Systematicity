@@ -15,7 +15,8 @@ from pathlib import Path
 # Loading the data and training the encoder
 DATA_CLOUD = "SCAN/"
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
+exp_result_dir = "exp-3-jump"
+# Path(exp_result_dir).mkdir(parents=True, exist_ok=True)
 def tokenize_data(data):
     token_data = []
     for i in range(len(data)):
@@ -100,22 +101,25 @@ for i in range(5):
     print(f"Seed: {i + 1}")
     seed_val = i+1
     random.seed(i)
-    encoder2 = EncoderLSTM(tokenizer.get_n_words(), hidden_size).to(device)
-    decoder2 = DecoderAttentionLSTM(hidden_size, tokenizer.get_n_cmds(), dropout_prob, MAX_LENGTH).to(device)
+    encoder1 = EncoderLSTM(tokenizer.get_n_words(), hidden_size).to(device)
+    decoder1 = DecoderAttentionLSTM(hidden_size, tokenizer.get_n_cmds(), dropout_prob, MAX_LENGTH).to(device)
     if subset:
         print("In loop ---")
-        BahDanauTrainer.train_loop(encoder2, decoder2, tokenizer, tensor_subset_train_data, 50, seed_val, print_every=10, plot_every=5, max_length=MAX_LENGTH)
-        results_dict['train'].append(BahDanauTrainer.getDatasetAccuracy(encoder2, decoder2, tokenizer, tensor_subset_train_data))
-        results_dict['test'].append(BahDanauTrainer.getDatasetAccuracy(encoder2, decoder2, tokenizer, tensor_subset_test_data))
-        BahDanauTrainer.evaluateRandomly(encoder2, decoder2, tokenizer, tensor_subset_test_data, mode="test", n=10, plot_attention=True)
+        BahDanauTrainer.train_loop(encoder1, decoder1, tokenizer, tensor_subset_train_data, 50, exp_result_dir, seed_val, print_every=10, plot_every=5, max_length=MAX_LENGTH)
+        results_dict['train'].append(BahDanauTrainer.getDatasetAccuracy(encoder1, decoder1, tokenizer, tensor_subset_train_data))
+        results_dict['test'].append(BahDanauTrainer.getDatasetAccuracy(encoder1, decoder1, tokenizer, tensor_subset_test_data))
+        BahDanauTrainer.evaluateRandomly(encoder1, decoder1, tokenizer, tensor_subset_test_data, exp_result_dir, mode="test", n=10, plot_attention=True)
     else:
-        BahDanauTrainer.train_loop(encoder2, decoder2, tokenizer, tensor_train_data       ,100000, seed_val, print_every=2000, plot_every=2000, max_length=MAX_LENGTH)
-        results_dict['train'].append(BahDanauTrainer.getDatasetAccuracy(encoder2, decoder2, tokenizer, tensor_train_data))
-        results_dict['test'].append(BahDanauTrainer.getDatasetAccuracy(encoder2, decoder2, tokenizer, tensor_test_data))
-        BahDanauTrainer.evaluateRandomly(encoder2, decoder2, tokenizer, tensor_test_data, mode="test", n=10, plot_attention=True)
+        BahDanauTrainer.train_loop(encoder1, decoder1, tokenizer, tensor_train_data       ,100000, exp_result_dir, seed_val, print_every=2000, plot_every=2000, max_length=MAX_LENGTH)
+        results_dict['train'].append(BahDanauTrainer.getDatasetAccuracy(encoder1, decoder1, tokenizer, tensor_train_data))
+        results_dict['test'].append(BahDanauTrainer.getDatasetAccuracy(encoder1, decoder1, tokenizer, tensor_test_data))
+        BahDanauTrainer.evaluateRandomly(encoder1, decoder1, tokenizer, tensor_test_data, exp_result_dir, mode="test", n=10, plot_attention=True)
 
     results_pd = pd.DataFrame.from_dict(results_dict) # fix because they aint in diff columns
     # creating a directory where the results will be saved
     results_dir = "results"
     Path(results_dir).mkdir(parents=True, exist_ok=True)
-    results_pd.to_csv(os.path.join(results_dir, str(seed_val) + "_" + "results.csv"))
+    results_pd.to_csv(os.path.join(results_dir, exp_result_dir + "_seed"+ str(seed_val) + "_" + "results.csv"))
+
+    torch.save(encoder1.state_dict(), os.path.join(exp_result_dir +"_seed"+ str(seed_val) +"_LSTMEncoder.model"))
+    torch.save(decoder1.state_dict(), os.path.join(exp_result_dir + "_seed"+ str(seed_val) + "_LSTMDecoder.model"))

@@ -26,6 +26,7 @@ def showPlot(points, filename):
     ax.yaxis.set_major_locator(loc)
     plt.plot(points)
     plt.savefig(f"{filename}.png")
+    plt.clf()
 
 def save_model(epochs, model, optimizer, criterion):
     """
