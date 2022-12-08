@@ -6,7 +6,7 @@ import os.path
 import torch, random
 from torch.utils.data import Dataset
 from loader import SCANDataset, TokenizerSCAN, SCANDataLoader
-from encoder_decoder import EncoderGRU, AttentionDecoderGRU
+from encoder_decoder import EncoderGRU, AttentionDecoderGRU, EncoderLSTM, DecoderAttentionLSTM
 from bahdanau_trainer import BahDanauTrainer
 from torch.utils.data import Subset
 import pandas as pd
@@ -27,8 +27,8 @@ def tokenize_data(data):
 # training file: tasks_train_addprim_jump.txt
 # testing file: tasks_test_addprim_jump.txt
 
-train_data = SCANDataset(root=DATA_CLOUD, split_type="add_prim_split", target_file='addprim_turn_left')
-test_data = SCANDataset(root=DATA_CLOUD, split_type="add_prim_split",  target_file='addprim_turn_left', train=False)
+train_data = SCANDataset(root=DATA_CLOUD, split_type="add_prim_split", target_file='addprim_jump')
+test_data = SCANDataset(root=DATA_CLOUD, split_type="add_prim_split",  target_file='addprim_jump', train=False)
 
 tokenizer = TokenizerSCAN()
 tokenizer.fit(train_data)
@@ -100,9 +100,10 @@ for i in range(5):
     print(f"Seed: {i + 1}")
     seed_val = i+1
     random.seed(i)
-    encoder2 = EncoderGRU(tokenizer.get_n_words(), hidden_size).to(device)
-    decoder2 = AttentionDecoderGRU(hidden_size, tokenizer.get_n_cmds(), dropout_prob, dropout_prob, MAX_LENGTH).to(device)
+    encoder2 = EncoderLSTM(tokenizer.get_n_words(), hidden_size).to(device)
+    decoder2 = DecoderAttentionLSTM(hidden_size, tokenizer.get_n_cmds(), dropout_prob, MAX_LENGTH).to(device)
     if subset:
+        print("In loop ---")
         BahDanauTrainer.train_loop(encoder2, decoder2, tokenizer, tensor_subset_train_data, 50, seed_val, print_every=10, plot_every=5, max_length=MAX_LENGTH)
         results_dict['train'].append(BahDanauTrainer.getDatasetAccuracy(encoder2, decoder2, tokenizer, tensor_subset_train_data))
         results_dict['test'].append(BahDanauTrainer.getDatasetAccuracy(encoder2, decoder2, tokenizer, tensor_subset_test_data))

@@ -55,7 +55,7 @@ class BahDanauTrainer():
 
         else:
             # Without teacher forcing: use its own predictions as the next input
-            for di in range(target_length):
+            for di in range(target_length): # input, prev_hidden, encoder_hidden
                 decoder_output, decoder_hidden, decoder_attention = decoder(
                     decoder_input, decoder_hidden, encoder_outputs)
                 topv, topi = decoder_output.topk(1)
