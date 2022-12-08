@@ -27,8 +27,8 @@ def tokenize_data(data):
 # training file: tasks_train_addprim_jump.txt
 # testing file: tasks_test_addprim_jump.txt
 
-train_data = SCANDataset(root=DATA_CLOUD, split_type="add_prim_split", target_file='addprim_jump')
-test_data = SCANDataset(root=DATA_CLOUD, split_type="add_prim_split",  target_file='addprim_jump', train=False)
+train_data = SCANDataset(root=DATA_CLOUD, split_type="add_prim_split", target_file='addprim_turn_left')
+test_data = SCANDataset(root=DATA_CLOUD, split_type="add_prim_split",  target_file='addprim_turn_left', train=False)
 
 tokenizer = TokenizerSCAN()
 tokenizer.fit(train_data)
