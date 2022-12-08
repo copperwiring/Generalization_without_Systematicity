@@ -109,8 +109,8 @@ for i in range(5):
         #BahDanauTrainer.evaluateRandomly(encoder2, decoder2, tokenizer, tensor_subset_test_data, mode="test", n=10, plot_attention=True)
     else:
         BahDanauTrainer.train_loop(encoder2, decoder2, tokenizer, tensor_train_data       ,5000, seed_val, print_every=100, plot_every=100, max_length=MAX_LENGTH)
-        results_dict['train'].append(BahDanauTrainer.getDatasetAccuracy(encoder2, decoder2, tensor_train_data))
-        results_dict['test'].append(BahDanauTrainer.getDatasetAccuracy(encoder2, decoder2, tensor_test_data))
+        results_dict['train'].append(BahDanauTrainer.getDatasetAccuracy(encoder2, decoder2, tokenizer, tensor_train_data))
+        results_dict['test'].append(BahDanauTrainer.getDatasetAccuracy(encoder2, decoder2, tokenizer, tensor_test_data))
 
     results_pd = pd.DataFrame.from_dict(results_dict) # fix because they aint in diff columns
     # creating a directory where the results will be saved
